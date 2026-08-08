@@ -1,0 +1,82 @@
+{{!-- Ingredients page: browse, add, update, and delete ingredients.
+      Browse table is populated by the "display all ingredients" query in
+      DML.sql (joined to Vendors so the preferred vendor's name is shown);
+      the form fields match the DML.sql Ingredients queries.
+      Submit buttons are stubs until the next step. --}}
+<h1>Ingredients</h1>
+<p>Manage the ingredients used in Homegrown's menu items.</p>
+
+<section>
+    <h2>Browse Ingredients</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Ingredient Name</th>
+                <th>Unit Type</th>
+                <th>Preferred Vendor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each ingredients}}
+            <tr>
+                <td>{{this.ingredientID}}</td>
+                <td>{{this.ingredientName}}</td>
+                <td>{{this.unitType}}</td>
+                {{!-- app.js joins Vendors and aliases the name as preferredVendor --}}
+                <td>{{this.preferredVendor}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Add Ingredient</h2>
+    <form method="POST" action="/ingredients/add">
+        <fieldset>
+            <legend>New ingredient details</legend>
+            <p>
+                <label for="add-ingredientName">New Ingredient Name:</label>
+                <input type="text" id="add-ingredientName" name="ingredientName" required>
+            </p>
+            <p>
+                <label for="add-unitType">Unit Type:</label>
+                <input type="text" id="add-unitType" name="unitType" required>
+            </p>
+            <button type="submit">Add Ingredient</button>
+        </fieldset>
+    </form>
+</section>
+
+<section>
+    <h2>Update Preferred Vendor</h2>
+    <form method="POST" action="/ingredients/update">
+        <fieldset>
+            <legend>Set the preferred vendor for an ingredient</legend>
+            <p>
+                <label for="update-ingredientID">Ingredient ID:</label>
+                <input type="number" id="update-ingredientID" name="ingredientID" required>
+            </p>
+            <p>
+                <label for="update-preferredVendorID">Preferred Vendor ID:</label>
+                <input type="number" id="update-preferredVendorID" name="preferredVendorID" required>
+            </p>
+            <button type="submit">Update Preferred Vendor</button>
+        </fieldset>
+    </form>
+</section>
+
+<section>
+    <h2>Delete Ingredient</h2>
+    <form method="POST" action="/ingredients/delete">
+        <fieldset>
+            <legend>Delete an ingredient by its ID</legend>
+            <p>
+                <label for="delete-ingredientID">Ingredient ID:</label>
+                <input type="number" id="delete-ingredientID" name="ingredientID" required>
+            </p>
+            <button type="submit">Delete Ingredient</button>
+        </fieldset>
+    </form>
+</section>

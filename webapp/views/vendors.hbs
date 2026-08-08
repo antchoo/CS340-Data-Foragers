@@ -1,0 +1,87 @@
+{{!-- Vendors page: browse, add, update, and delete vendors --}}
+<h1>Vendors</h1>
+<p>Manage the vendors who sell ingredients to Homegrown.</p>
+
+<section>
+    <h2>Browse Vendors</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Vendor Name</th>
+                <th>Representative</th>
+                <th>Contact Number</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each vendors}}
+            <tr>
+                <td>{{this.vendorID}}</td>
+                <td>{{this.vendorName}}</td>
+                <td>{{this.vendorRepresentative}}</td>
+                <td>{{this.vendorContact}}</td>
+                <td>
+                    <form method="POST" action="/vendors/delete">
+                        <input type="hidden" name="vendorID" value="{{this.vendorID}}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Add a New Vendor</h2>
+    <form method="POST" action="/vendors/add">
+        <fieldset>
+            <legend>New vendor details</legend>
+            <p>
+                <label for="add-vendorName">Vendor Name:</label>
+                <input type="text" id="add-vendorName" name="vendorName" maxlength="155" required>
+            </p>
+            <p>
+                <label for="add-vendorRepresentative">Representative:</label>
+                <input type="text" id="add-vendorRepresentative" name="vendorRepresentative" maxlength="155">
+            </p>
+            <p>
+                <label for="add-vendorContact">Contact Number:</label>
+                <input type="tel" id="add-vendorContact" name="vendorContact" maxlength="13" placeholder="5415551234">
+            </p>
+            <button type="submit">Add Vendor</button>
+        </fieldset>
+    </form>
+</section>
+
+<section>
+    <h2>Update a Vendor</h2>
+    <form method="POST" action="/vendors/update">
+        <fieldset>
+            <legend>Select a vendor and enter its new details</legend>
+            <p>
+                <label for="update-vendorID">Vendor to Update:</label>
+                <select id="update-vendorID" name="vendorID" required>
+                    <option value="">-- select a vendor --</option>
+                    {{#each vendors}}
+                    <option value="{{this.vendorID}}">{{this.vendorName}}</option>
+                    {{/each}}
+                </select>
+            </p>
+            <p>
+                <label for="update-vendorName">New Vendor Name:</label>
+                <input type="text" id="update-vendorName" name="vendorName" maxlength="155" required>
+            </p>
+            <p>
+                <label for="update-vendorRepresentative">New Representative:</label>
+                <input type="text" id="update-vendorRepresentative" name="vendorRepresentative" maxlength="155">
+            </p>
+            <p>
+                <label for="update-vendorContact">New Contact Number:</label>
+                <input type="tel" id="update-vendorContact" name="vendorContact" maxlength="13">
+            </p>
+            <button type="submit">Update Vendor</button>
+        </fieldset>
+    </form>
+</section>

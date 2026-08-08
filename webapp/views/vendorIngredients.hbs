@@ -1,0 +1,112 @@
+{{!-- VendorIngredients page: manage which ingredients each vendor offers and
+      the cost per unit (M:N intersection of Vendors and Ingredients) --}}
+<h1>Vendor Ingredients</h1>
+<p>Manage which ingredients each vendor offers and the cost per unit.</p>
+
+<section>
+    <h2>Browse Vendor Ingredients</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Vendor</th>
+                <th>Ingredient</th>
+                <th>Unit Cost ($)</th>
+                <th>Unit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each vendorIngredients}}
+            <tr>
+                <td>{{this.vendorIngredientID}}</td>
+                <td>{{this.vendorName}}</td>
+                <td>{{this.ingredientName}}</td>
+                <td>{{this.unitCost}}</td>
+                <td>{{this.unitType}}</td>
+                <td>
+                    <form method="POST" action="/vendorIngredients/delete">
+                        <input type="hidden" name="vendorIngredientID" value="{{this.vendorIngredientID}}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Add an Ingredient Offered by a Vendor</h2>
+    <form method="POST" action="/vendorIngredients/add">
+        <fieldset>
+            <legend>New vendor / ingredient offering</legend>
+            <p>
+                <label for="add-vendorID">Vendor:</label>
+                <select id="add-vendorID" name="vendorID" required>
+                    <option value="">-- select a vendor --</option>
+                    {{#each vendors}}
+                    <option value="{{this.vendorID}}">{{this.vendorName}}</option>
+                    {{/each}}
+                </select>
+            </p>
+            <p>
+                <label for="add-ingredientID">Ingredient:</label>
+                <select id="add-ingredientID" name="ingredientID" required>
+                    <option value="">-- select an ingredient --</option>
+                    {{#each ingredients}}
+                    <option value="{{this.ingredientID}}">{{this.ingredientName}} ({{this.unitType}})</option>
+                    {{/each}}
+                </select>
+            </p>
+            <p>
+                <label for="add-unitCost">Cost per Unit ($):</label>
+                <input type="number" id="add-unitCost" name="unitCost"
+                       min="0.01" max="99.99" step="0.01" required>
+            </p>
+            <button type="submit">Add Vendor Ingredient</button>
+        </fieldset>
+    </form>
+</section>
+
+<section>
+    <h2>Update a Vendor Ingredient</h2>
+    <form method="POST" action="/vendorIngredients/update">
+        <fieldset>
+            <legend>Select an offering and enter its new details</legend>
+            <p>
+                <label for="update-vendorIngredientID">Offering to Update:</label>
+                <select id="update-vendorIngredientID" name="vendorIngredientID" required>
+                    <option value="">-- select an offering --</option>
+                    {{#each vendorIngredients}}
+                    <option value="{{this.vendorIngredientID}}">{{this.vendorName}} — {{this.ingredientName}}</option>
+                    {{/each}}
+                </select>
+            </p>
+            <p>
+                <label for="update-vendorID">New Vendor:</label>
+                <select id="update-vendorID" name="vendorID" required>
+                    <option value="">-- select a vendor --</option>
+                    {{#each vendors}}
+                    <option value="{{this.vendorID}}">{{this.vendorName}}</option>
+                    {{/each}}
+                </select>
+            </p>
+            <p>
+                <label for="update-ingredientID">New Ingredient:</label>
+                <select id="update-ingredientID" name="ingredientID" required>
+                    <option value="">-- select an ingredient --</option>
+                    {{#each ingredients}}
+                    <option value="{{this.ingredientID}}">{{this.ingredientName}} ({{this.unitType}})</option>
+                    {{/each}}
+                </select>
+            </p>
+            <p>
+                <label for="update-unitCost">New Cost per Unit ($):</label>
+                <input type="number" id="update-unitCost" name="unitCost"
+                       min="0.01" max="99.99" step="0.01" required>
+            </p>
+            <button type="submit">Update Vendor Ingredient</button>
+        </fieldset>
+    </form>
+</section>

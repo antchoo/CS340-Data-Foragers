@@ -1,0 +1,112 @@
+{{!-- MenuItemIngredients page: manage which ingredients (and how much of each)
+      go into each menu item (M:N intersection of MenuItems and Ingredients) --}}
+<h1>Menu Item Ingredients</h1>
+<p>Manage which ingredients, and how much of each, go into every menu item.</p>
+
+<section>
+    <h2>Browse Menu Item Ingredients</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Menu Item</th>
+                <th>Ingredient</th>
+                <th>Amount</th>
+                <th>Unit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each menuItemIngredients}}
+            <tr>
+                <td>{{this.menuItemIngredientID}}</td>
+                <td>{{this.menuItemName}}</td>
+                <td>{{this.ingredientName}}</td>
+                <td>{{this.ingredientAmount}}</td>
+                <td>{{this.unitType}}</td>
+                <td>
+                    <form method="POST" action="/menuItemIngredients/delete">
+                        <input type="hidden" name="menuItemIngredientID" value="{{this.menuItemIngredientID}}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Add an Ingredient to a Menu Item</h2>
+    <form method="POST" action="/menuItemIngredients/add">
+        <fieldset>
+            <legend>New menu item / ingredient pairing</legend>
+            <p>
+                <label for="add-menuItemID">Menu Item:</label>
+                <select id="add-menuItemID" name="menuItemID" required>
+                    <option value="">-- select a menu item --</option>
+                    {{#each menuItems}}
+                    <option value="{{this.menuItemID}}">{{this.menuItemName}}</option>
+                    {{/each}}
+                </select>
+            </p>
+            <p>
+                <label for="add-ingredientID">Ingredient:</label>
+                <select id="add-ingredientID" name="ingredientID" required>
+                    <option value="">-- select an ingredient --</option>
+                    {{#each ingredients}}
+                    <option value="{{this.ingredientID}}">{{this.ingredientName}} ({{this.unitType}})</option>
+                    {{/each}}
+                </select>
+            </p>
+            <p>
+                <label for="add-ingredientAmount">Amount (in the ingredient's unit):</label>
+                <input type="number" id="add-ingredientAmount" name="ingredientAmount"
+                       min="0.01" max="99.99" step="0.01" required>
+            </p>
+            <button type="submit">Add Ingredient to Menu Item</button>
+        </fieldset>
+    </form>
+</section>
+
+<section>
+    <h2>Update a Menu Item Ingredient</h2>
+    <form method="POST" action="/menuItemIngredients/update">
+        <fieldset>
+            <legend>Select a pairing and enter its new details</legend>
+            <p>
+                <label for="update-menuItemIngredientID">Pairing to Update:</label>
+                <select id="update-menuItemIngredientID" name="menuItemIngredientID" required>
+                    <option value="">-- select a pairing --</option>
+                    {{#each menuItemIngredients}}
+                    <option value="{{this.menuItemIngredientID}}">{{this.menuItemName}} — {{this.ingredientName}}</option>
+                    {{/each}}
+                </select>
+            </p>
+            <p>
+                <label for="update-menuItemID">New Menu Item:</label>
+                <select id="update-menuItemID" name="menuItemID" required>
+                    <option value="">-- select a menu item --</option>
+                    {{#each menuItems}}
+                    <option value="{{this.menuItemID}}">{{this.menuItemName}}</option>
+                    {{/each}}
+                </select>
+            </p>
+            <p>
+                <label for="update-ingredientID">New Ingredient:</label>
+                <select id="update-ingredientID" name="ingredientID" required>
+                    <option value="">-- select an ingredient --</option>
+                    {{#each ingredients}}
+                    <option value="{{this.ingredientID}}">{{this.ingredientName}} ({{this.unitType}})</option>
+                    {{/each}}
+                </select>
+            </p>
+            <p>
+                <label for="update-ingredientAmount">New Amount:</label>
+                <input type="number" id="update-ingredientAmount" name="ingredientAmount"
+                       min="0.01" max="99.99" step="0.01" required>
+            </p>
+            <button type="submit">Update Menu Item Ingredient</button>
+        </fieldset>
+    </form>
+</section>

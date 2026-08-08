@@ -1,0 +1,32 @@
+{{!-- Home page: describes the project and links to each entity page --}}
+<h1>Homegrown Restaurant Menu Pricing Database</h1>
+<p>
+    Group 41 &mdash; The Data Foragers (Anton Choo and Borislava Grigorova).
+    This web app manages the menu items, ingredients, and vendors that drive
+    Homegrown's menu pricing.
+</p>
+
+<section>
+    <h2>Entity Pages</h2>
+    <ul>
+        <li><a href="/menuItems">Manage Menu Items</a></li>
+        <li><a href="/ingredients">Manage Ingredients</a></li>
+        <li><a href="/vendors">Manage Vendors</a></li>
+        <li><a href="/menuItemIngredients">Manage Menu Item Ingredients</a></li>
+        <li><a href="/vendorIngredients">Manage Vendor Ingredients</a></li>
+    </ul>
+</section>
+
+<section>
+    <h2>RESET and Demo</h2>
+    <p>
+        The red <strong>RESET Database</strong> button in the navigation bar
+        drops and recreates all tables with their sample data by calling the
+        <code>sp_load_foodmenudb()</code> stored procedure.
+    </p>
+    <p>
+        To verify the RESET works: on the <a href="/menuItems">Menu Items</a>
+        page, press <strong>Delete 'French Dip' (RESET demo)</strong> and watch
+        French Dip disappear from the table, then press RESET and it comes back.
+    </p>
+</section>

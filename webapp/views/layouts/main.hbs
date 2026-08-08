@@ -1,0 +1,44 @@
+{{!--
+    Shared layout: nav bar (with the RESET button) + error banner.
+    Citation: layout pattern from the OSU CS340 nodejs-starter-app
+    (https://github.com/osu-cs340-ecampus/nodejs-starter-app).
+--}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homegrown Menu Pricing System</title>
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; margin: 2em; }
+        nav { margin-bottom: 1.5em; display: flex; align-items: center; flex-wrap: wrap; gap: 1em; }
+        table { border-collapse: collapse; margin-bottom: 2em; }
+        th, td { border: 1px solid #444; padding: 0.4em 0.8em; text-align: left; }
+        th { background-color: #eee; }
+        section { margin-bottom: 2.5em; }
+        form label { display: inline-block; min-width: 12em; margin-bottom: 0.5em; }
+        fieldset { max-width: 32em; }
+        .reset-button { background-color: #b30000; color: white; border: none;
+                        padding: 0.4em 0.9em; cursor: pointer; font-weight: bold; }
+        .db-error { background-color: #ffe0e0; border: 1px solid #b30000;
+                    padding: 0.6em 1em; margin-bottom: 1.5em; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/menuItems">Menu Items</a>
+        <a href="/ingredients">Ingredients</a>
+        <a href="/vendors">Vendors</a>
+        <a href="/menuItemIngredients">Menu Item Ingredients</a>
+        <a href="/vendorIngredients">Vendor Ingredients</a>
+        <form method="POST" action="/reset">
+            <button type="submit" class="reset-button">RESET Database</button>
+        </form>
+    </nav>
+    {{#if dbError}}
+    <p class="db-error">Database error: {{dbError}} &mdash; the tables below may be empty.</p>
+    {{/if}}
+    {{{body}}}
+</body>
+</html>

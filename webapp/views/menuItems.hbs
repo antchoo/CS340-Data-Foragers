@@ -1,0 +1,95 @@
+{{!-- MenuItems page: browse, add, update, and delete menu items.
+      Browse table is populated by the "display all Menu Items" query in
+      DML.sql; the form fields match the DML.sql MenuItems queries.
+      Submit buttons (other than the RESET demo) are stubs until the next step. --}}
+<h1>Menu Items</h1>
+<p>Manage the menu items Homegrown offers and their total ingredient cost.</p>
+
+<section>
+    <h2>Browse Menu Items</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Menu Item Name</th>
+                <th>Total Cost ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each menuItems}}
+            <tr>
+                <td>{{this.menuItemID}}</td>
+                <td>{{this.menuItemName}}</td>
+                <td>{{this.menuItemTotalCost}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    {{!-- one working CUD operation to demonstrate that RESET works: delete
+          French Dip here, then press RESET Database in the nav bar and it
+          reappears (calls sp_demo_delete_menu_item in PL.SQL) --}}
+    <form method="POST" action="/menuItems/delete-french-dip">
+        <button type="submit">Delete 'French Dip' (RESET demo)</button>
+    </form>
+</section>
+
+<section>
+    <h2>Add Menu Item</h2>
+    <form method="POST" action="/menuItems/add">
+        <fieldset>
+            <legend>New menu item details</legend>
+            <p>
+                <label for="add-menuItemName">New Menu Item Name:</label>
+                <input type="text" id="add-menuItemName" name="menuItemName" required>
+            </p>
+            <button type="submit">Add Menu Item</button>
+        </fieldset>
+    </form>
+</section>
+
+<section>
+    <h2>Update Menu Item Name</h2>
+    <form method="POST" action="/menuItems/update">
+        <fieldset>
+            <legend>Select a menu item and enter its new name</legend>
+            <p>
+                <label for="update-menuItemID">Menu Item ID:</label>
+                <input type="number" id="update-menuItemID" name="menuItemID" required>
+            </p>
+            <p>
+                <label for="update-menuItemName">New Menu Item Name:</label>
+                <input type="text" id="update-menuItemName" name="menuItemName" required>
+            </p>
+            <button type="submit">Update Menu Item Name</button>
+        </fieldset>
+    </form>
+</section>
+
+<section>
+    <h2>Delete Menu Item</h2>
+    <form method="POST" action="/menuItems/delete">
+        <fieldset>
+            <legend>Delete a menu item by its ID</legend>
+            <p>
+                <label for="delete-menuItemID">Menu Item ID:</label>
+                <input type="number" id="delete-menuItemID" name="menuItemID" required>
+            </p>
+            <button type="submit">Delete Menu Item</button>
+        </fieldset>
+    </form>
+</section>
+
+<section>
+    <h2>Calculate Menu Item Total Cost</h2>
+    <form method="POST" action="/menuItems/calculateTotalCost">
+        <fieldset>
+            <legend>Recalculate the total cost for a menu item</legend>
+            <p>
+                <label for="calc-menuItemID">Menu Item ID:</label>
+                <input type="number" id="calc-menuItemID" name="menuItemID" required>
+            </p>
+            <button type="submit">Calculate Total Cost</button>
+        </fieldset>
+    </form>
+</section>
