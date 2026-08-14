@@ -3,7 +3,7 @@
 <p>Manage the vendors who sell ingredients to Homegrown.</p>
 
 <section>
-    <h2>Browse Vendors</h2>
+    <h2>READ &mdash; Browse Vendors</h2>
     <table>
         <thead>
             <tr>
@@ -34,12 +34,12 @@
 </section>
 
 <section>
-    <h2>Add a New Vendor</h2>
+    <h2>CREATE &mdash; Add a New Vendor</h2>
     <form method="POST" action="/vendors/add">
         <fieldset>
-            <legend>New vendor details</legend>
+            <legend>New vendor details (<span class="required-marker">*</span> required)</legend>
             <p>
-                <label for="add-vendorName">Vendor Name:</label>
+                <label for="add-vendorName">Vendor Name: <span class="required-marker">*</span></label>
                 <input type="text" id="add-vendorName" name="vendorName" maxlength="155" required>
             </p>
             <p>
@@ -56,10 +56,10 @@
 </section>
 
 <section>
-    <h2>Update a Vendor</h2>
+    <h2>UPDATE &mdash; Update a Vendor</h2>
     <form method="POST" action="/vendors/update">
         <fieldset>
-            <legend>Select a vendor and enter its new details</legend>
+            <legend>Select a vendor and enter its new details (<span class="required-marker">*</span> required)</legend>
             <p>
                 <label for="update-vendorID">Vendor to Update:</label>
                 <select id="update-vendorID" name="vendorID" required>

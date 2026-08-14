@@ -18,15 +18,13 @@
 </section>
 
 <section>
-    <h2>RESET and Demo</h2>
+    <h2>RESET Database</h2>
     <p>
         The red <strong>RESET Database</strong> button in the navigation bar
-        drops and recreates all tables with their sample data by calling the
-        <code>sp_load_foodmenudb()</code> stored procedure.
-    </p>
-    <p>
-        To verify the RESET works: on the <a href="/menuItems">Menu Items</a>
-        page, press <strong>Delete 'French Dip' (RESET demo)</strong> and watch
-        French Dip disappear from the table, then press RESET and it comes back.
+        restores every table to its original sample data by calling the
+        <code>sp_reset_foodmenudb()</code> stored procedure (PL.SQL), which
+        rebuilds the schema via <code>sp_load_foodmenudb()</code> (DDL.sql).
+        Feel free to add, update, and delete anything &mdash; one click brings
+        the database back to its starting state.
     </p>
 </section>

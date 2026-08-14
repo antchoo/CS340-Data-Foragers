@@ -1,13 +1,13 @@
 {{!-- Ingredients page: browse, add, update, and delete ingredients.
       Browse table is populated by the "display all ingredients" query in
       DML.sql (joined to Vendors so the preferred vendor's name is shown);
-      the form fields match the DML.sql Ingredients queries.
-      Submit buttons are stubs until the next step. --}}
+      every submit button calls a stored procedure from PL.SQL through the
+      matching route in app.js. --}}
 <h1>Ingredients</h1>
 <p>Manage the ingredients used in Homegrown's menu items.</p>
 
 <section>
-    <h2>Browse Ingredients</h2>
+    <h2>READ &mdash; Browse Ingredients</h2>
     <table>
         <thead>
             <tr>
@@ -15,6 +15,7 @@
                 <th>Ingredient Name</th>
                 <th>Unit Type</th>
                 <th>Preferred Vendor</th>
+                <th>Delete</th>
             </tr>
         </thead>
         <tbody>
@@ -25,6 +26,15 @@
                 <td>{{this.unitType}}</td>
                 {{!-- app.js joins Vendors and aliases the name as preferredVendor --}}
                 <td>{{this.preferredVendor}}</td>
+                <td>
+                    {{!-- DELETE: per-row button so the user never types an ID;
+                          calls sp_delete_ingredient (cascades to both
+                          intersection tables) --}}
+                    <form method="POST" action="/ingredients/delete">
+                        <input type="hidden" name="ingredientID" value="{{this.ingredientID}}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
             </tr>
             {{/each}}
         </tbody>
@@ -32,17 +42,32 @@
 </section>
 
 <section>
-    <h2>Add Ingredient</h2>
+    <h2>CREATE &mdash; Add a New Ingredient</h2>
     <form method="POST" action="/ingredients/add">
         <fieldset>
-            <legend>New ingredient details</legend>
+            <legend>New ingredient details (<span class="required-marker">*</span> required)</legend>
             <p>
-                <label for="add-ingredientName">New Ingredient Name:</label>
-                <input type="text" id="add-ingredientName" name="ingredientName" required>
+                <label for="add-ingredientName">Ingredient Name: <span class="required-marker">*</span></label>
+                <input type="text" id="add-ingredientName" name="ingredientName" maxlength="155" required>
             </p>
             <p>
-                <label for="add-unitType">Unit Type:</label>
-                <input type="text" id="add-unitType" name="unitType" required>
+                {{!-- only 'oz' and 'each' pass the CHECK constraint in DDL.sql,
+                      so this is a dropdown instead of free text --}}
+                <label for="add-unitType">Unit Type: <span class="required-marker">*</span></label>
+                <select id="add-unitType" name="unitType" required>
+                    <option value="">-- select a unit type --</option>
+                    <option value="oz">oz</option>
+                    <option value="each">each</option>
+                </select>
+            </p>
+            <p>
+                <label for="add-preferredVendorID">Preferred Vendor:</label>
+                <select id="add-preferredVendorID" name="preferredVendorID">
+                    <option value="">(none yet)</option>
+                    {{#each vendors}}
+                    <option value="{{this.vendorID}}">{{this.vendorName}}</option>
+                    {{/each}}
+                </select>
             </p>
             <button type="submit">Add Ingredient</button>
         </fieldset>
@@ -50,33 +75,29 @@
 </section>
 
 <section>
-    <h2>Update Preferred Vendor</h2>
+    <h2>UPDATE &mdash; Change an Ingredient's Preferred Vendor</h2>
     <form method="POST" action="/ingredients/update">
         <fieldset>
-            <legend>Set the preferred vendor for an ingredient</legend>
+            <legend>Select an ingredient and its new preferred vendor</legend>
             <p>
-                <label for="update-ingredientID">Ingredient ID:</label>
-                <input type="number" id="update-ingredientID" name="ingredientID" required>
+                <label for="update-ingredientID">Ingredient: <span class="required-marker">*</span></label>
+                <select id="update-ingredientID" name="ingredientID" required>
+                    <option value="">-- select an ingredient --</option>
+                    {{#each ingredients}}
+                    <option value="{{this.ingredientID}}">{{this.ingredientName}}</option>
+                    {{/each}}
+                </select>
             </p>
             <p>
-                <label for="update-preferredVendorID">Preferred Vendor ID:</label>
-                <input type="number" id="update-preferredVendorID" name="preferredVendorID" required>
+                <label for="update-preferredVendorID">New Preferred Vendor:</label>
+                <select id="update-preferredVendorID" name="preferredVendorID">
+                    <option value="">(none)</option>
+                    {{#each vendors}}
+                    <option value="{{this.vendorID}}">{{this.vendorName}}</option>
+                    {{/each}}
+                </select>
             </p>
             <button type="submit">Update Preferred Vendor</button>
-        </fieldset>
-    </form>
-</section>
-
-<section>
-    <h2>Delete Ingredient</h2>
-    <form method="POST" action="/ingredients/delete">
-        <fieldset>
-            <legend>Delete an ingredient by its ID</legend>
-            <p>
-                <label for="delete-ingredientID">Ingredient ID:</label>
-                <input type="number" id="delete-ingredientID" name="ingredientID" required>
-            </p>
-            <button type="submit">Delete Ingredient</button>
         </fieldset>
     </form>
 </section>

@@ -2,14 +2,21 @@
     The Data Foragers - Group 41 CS340 Summer 2026 OSU
     Anton Choo and Borislava Grigorova
 
-    Step 4 Draft: serves the UI pages for the Homegrown Restaurant Food Menu
-    Pricing System. Every entity page now runs its SELECT queries from DML.sql
-    against the database. The RESET button and the "delete French Dip" demo
-    call the stored procedures defined in DDL.sql / PL.SQL.
+    CS340 Portfolio Project (Final Step): serves the UI for the Homegrown
+    Restaurant Food Menu Pricing System.
 
-    Only the RESET and its demo DELETE are functional CUD operations in this
-    step; the add/update/delete forms on the entity pages are wired to stub
-    routes and will be implemented in the next project step.
+    - Every entity page runs its SELECT queries (listed in DML.sql).
+    - Every CREATE / UPDATE / DELETE goes through a stored procedure defined
+      in PL.SQL (`CALL sp_...`); no inline INSERT/UPDATE/DELETE here.
+    - The RESET button calls sp_reset_foodmenudb() (PL.SQL), which rebuilds
+      the schema and sample data via sp_load_foodmenudb() (DDL.sql).
+
+    Citation: Express + express-handlebars app structure and the
+    route/render pattern adapted from the OSU CS340 nodejs-starter-app
+    (https://github.com/osu-cs340-ecampus/nodejs-starter-app), accessed
+    2026-08-06. All queries, stored-procedure calls, routes, and page logic
+    below are our own work; CUD routes drafted with Claude (Anthropic) on
+    2026-08-12 and reviewed by the team (see README.md).
 */
 
 const express = require('express');
@@ -28,10 +35,27 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 /*
-    Each GET route below runs the matching SELECT from DML.sql (the query text
-    is copied verbatim; the DML.sql comment naming it is noted above each one).
-    If the database is unreachable the page still renders with an error banner
-    so the UI stays browsable.
+    Helper for CUD routes: runs the stored-procedure call, then sends the
+    user back to the page they came from. If the database rejects the
+    operation the error is shown with a link back so the UI stays usable.
+*/
+async function runProcedure(res, redirectTo, sql, params, actionLabel) {
+    try {
+        await db.query(sql, params);
+        res.redirect(redirectTo);
+    } catch (error) {
+        console.error(`Error during ${actionLabel}:`, error);
+        res.status(500).send(
+            `An error occurred while trying to ${actionLabel}: ${error.message}. ` +
+            '<a href="javascript:history.back()">Go back</a>'
+        );
+    }
+}
+
+/*
+    READ routes: each GET below runs the matching SELECT from DML.sql. If the
+    database is unreachable the page still renders with an error banner so
+    the UI stays browsable.
 */
 
 // home page
@@ -39,7 +63,7 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
-// MenuItems page -- DML.sql: "browse all menu items"
+// MenuItems page -- DML.sql: "display all Menu Items"
 app.get('/menuItems', async (req, res) => {
     try {
         const [menuItems] = await db.query(
@@ -54,8 +78,8 @@ app.get('/menuItems', async (req, res) => {
     }
 });
 
-// Ingredients page -- DML.sql: "browse all ingredients, showing the preferred
-// vendor's name instead of its ID" + "populate the Preferred Vendor dropdown"
+// Ingredients page -- DML.sql: "display all ingredients" (joined to Vendors
+// so the preferred vendor's name is shown) + the Preferred Vendor dropdown
 app.get('/ingredients', async (req, res) => {
     try {
         const [ingredients] = await db.query(
@@ -75,7 +99,7 @@ app.get('/ingredients', async (req, res) => {
     }
 });
 
-// Vendors page -- DML.sql: "browse all vendors"
+// Vendors page -- DML.sql: "display all vendors"
 app.get('/vendors', async (req, res) => {
     try {
         const [vendors] = await db.query(
@@ -90,8 +114,8 @@ app.get('/vendors', async (req, res) => {
     }
 });
 
-// MenuItemIngredients page -- DML.sql: "browse all menu item / ingredient
-// pairings" + the Menu Item and Ingredient dropdown queries
+// MenuItemIngredients page -- DML.sql: "display all menu item ingredients"
+// + the Menu Item and Ingredient dropdown queries
 app.get('/menuItemIngredients', async (req, res) => {
     try {
         const [menuItemIngredients] = await db.query(
@@ -109,7 +133,7 @@ app.get('/menuItemIngredients', async (req, res) => {
             `SELECT menuItemID, menuItemName FROM MenuItems ORDER BY menuItemName;`
         );
         const [ingredients] = await db.query(
-            `SELECT ingredientID, ingredientName FROM Ingredients ORDER BY ingredientName;`
+            `SELECT ingredientID, ingredientName, unitType FROM Ingredients ORDER BY ingredientName;`
         );
         res.render('menuItemIngredients', {
             menuItemIngredients: menuItemIngredients,
@@ -124,8 +148,8 @@ app.get('/menuItemIngredients', async (req, res) => {
     }
 });
 
-// VendorIngredients page -- DML.sql: "browse all vendor / ingredient
-// offerings" + the Vendor and Ingredient dropdown queries
+// VendorIngredients page -- DML.sql: "display all vendor ingredients"
+// + the Vendor and Ingredient dropdown queries
 app.get('/vendorIngredients', async (req, res) => {
     try {
         const [vendorIngredients] = await db.query(
@@ -143,7 +167,7 @@ app.get('/vendorIngredients', async (req, res) => {
             `SELECT vendorID, vendorName FROM Vendors ORDER BY vendorName;`
         );
         const [ingredients] = await db.query(
-            `SELECT ingredientID, ingredientName FROM Ingredients ORDER BY ingredientName;`
+            `SELECT ingredientID, ingredientName, unitType FROM Ingredients ORDER BY ingredientName;`
         );
         res.render('vendorIngredients', {
             vendorIngredients: vendorIngredients,
@@ -159,55 +183,152 @@ app.get('/vendorIngredients', async (req, res) => {
 });
 
 /*
-    RESET button: drops and recreates the whole schema with its sample data by
-    calling the stored procedure that wraps DDL.sql (see DDL.sql / PL.SQL --
-    the procedure name must stay in sync with those files).
+    CUD routes: every operation below calls a stored procedure from PL.SQL.
 */
-app.post('/reset', async (req, res) => {
-    try {
-        await db.query('CALL sp_load_foodmenudb();');
-        res.redirect('/menuItems');
-    } catch (error) {
-        console.error('Error executing sp_load_foodmenudb:', error);
-        res.status(500).send('An error occurred while resetting the database.');
-    }
+
+// MenuItems ------------------------------------------------------
+
+app.post('/menuItems/add', (req, res) => {
+    runProcedure(res, '/menuItems',
+        'CALL sp_insert_menu_item(?);',
+        [req.body.menuItemName],
+        'add the menu item');
 });
 
-/*
-    Demo CUD operation to show that RESET works: deletes the 'French Dip' menu
-    item via a stored procedure (see PL.SQL). Visit /menuItems, use this
-    button, watch French Dip disappear, then press RESET to bring it back.
-*/
-app.post('/menuItems/delete-french-dip', async (req, res) => {
-    try {
-        await db.query('CALL sp_demo_delete_menu_item();');
-        res.redirect('/menuItems');
-    } catch (error) {
-        console.error('Error executing sp_demo_delete_menu_item:', error);
-        res.status(500).send('An error occurred while running the demo delete.');
-    }
+app.post('/menuItems/update', (req, res) => {
+    runProcedure(res, '/menuItems',
+        'CALL sp_update_menu_item(?, ?);',
+        [req.body.menuItemID, req.body.menuItemName],
+        'update the menu item');
 });
 
-/*
-    The add/update/delete forms on the entity pages post to these routes.
-    They are intentionally stubs for Step 4 (only one CUD operation is
-    required, the RESET demo above); they will call the DML.sql queries via
-    PL/SQL in the next project step.
-*/
-const notImplemented = (req, res) => {
-    res.status(501).send(
-        'This add/update/delete operation will be implemented in the next ' +
-        'project step. <a href="javascript:history.back()">Go back</a>'
-    );
-};
+app.post('/menuItems/delete', (req, res) => {
+    runProcedure(res, '/menuItems',
+        'CALL sp_delete_menu_item(?);',
+        [req.body.menuItemID],
+        'delete the menu item');
+});
 
-[
-    '/menuItems/add', '/menuItems/update', '/menuItems/delete', '/menuItems/calculateTotalCost',
-    '/ingredients/add', '/ingredients/update', '/ingredients/delete',
-    '/vendors/add', '/vendors/update', '/vendors/delete',
-    '/menuItemIngredients/add', '/menuItemIngredients/update', '/menuItemIngredients/delete',
-    '/vendorIngredients/add', '/vendorIngredients/update', '/vendorIngredients/delete'
-].forEach((path) => app.post(path, notImplemented));
+// recalculates menuItemTotalCost from ingredient amounts x the preferred
+// vendor's unit cost (an UPDATE run inside sp_refresh_menu_item_cost)
+app.post('/menuItems/calculateTotalCost', (req, res) => {
+    runProcedure(res, '/menuItems',
+        'CALL sp_refresh_menu_item_cost(?);',
+        [req.body.menuItemID],
+        "recalculate the menu item's total cost");
+});
+
+// Ingredients ----------------------------------------------------
+
+app.post('/ingredients/add', (req, res) => {
+    // the Preferred Vendor dropdown sends '' for "none"; store NULL then
+    const preferredVendorID = req.body.preferredVendorID || null;
+    runProcedure(res, '/ingredients',
+        'CALL sp_insert_ingredient(?, ?, ?);',
+        [req.body.ingredientName, req.body.unitType, preferredVendorID],
+        'add the ingredient');
+});
+
+app.post('/ingredients/update', (req, res) => {
+    const preferredVendorID = req.body.preferredVendorID || null;
+    runProcedure(res, '/ingredients',
+        'CALL sp_update_ingredient_vendor(?, ?);',
+        [req.body.ingredientID, preferredVendorID],
+        "update the ingredient's preferred vendor");
+});
+
+app.post('/ingredients/delete', (req, res) => {
+    runProcedure(res, '/ingredients',
+        'CALL sp_delete_ingredient(?);',
+        [req.body.ingredientID],
+        'delete the ingredient');
+});
+
+// Vendors --------------------------------------------------------
+
+app.post('/vendors/add', (req, res) => {
+    runProcedure(res, '/vendors',
+        'CALL sp_insert_vendor(?, ?, ?);',
+        [req.body.vendorName, req.body.vendorRepresentative || null, req.body.vendorContact || null],
+        'add the vendor');
+});
+
+app.post('/vendors/update', (req, res) => {
+    runProcedure(res, '/vendors',
+        'CALL sp_update_vendor(?, ?, ?, ?);',
+        [req.body.vendorID, req.body.vendorName,
+         req.body.vendorRepresentative || null, req.body.vendorContact || null],
+        'update the vendor');
+});
+
+app.post('/vendors/delete', (req, res) => {
+    runProcedure(res, '/vendors',
+        'CALL sp_delete_vendor(?);',
+        [req.body.vendorID],
+        'delete the vendor');
+});
+
+// MenuItemIngredients (M:N) --------------------------------------
+
+app.post('/menuItemIngredients/add', (req, res) => {
+    runProcedure(res, '/menuItemIngredients',
+        'CALL sp_insert_menu_item_ingredient(?, ?, ?);',
+        [req.body.menuItemID, req.body.ingredientID, req.body.ingredientAmount],
+        'add the menu item ingredient');
+});
+
+// UPDATE of an M:N relationship: both FK values in the intersection row can
+// be changed here
+app.post('/menuItemIngredients/update', (req, res) => {
+    runProcedure(res, '/menuItemIngredients',
+        'CALL sp_update_menu_item_ingredient(?, ?, ?, ?);',
+        [req.body.menuItemIngredientID, req.body.menuItemID,
+         req.body.ingredientID, req.body.ingredientAmount],
+        'update the menu item ingredient');
+});
+
+// DELETE of an M:N relationship: removes only the intersection row
+app.post('/menuItemIngredients/delete', (req, res) => {
+    runProcedure(res, '/menuItemIngredients',
+        'CALL sp_delete_menu_item_ingredient(?);',
+        [req.body.menuItemIngredientID],
+        'delete the menu item ingredient');
+});
+
+// VendorIngredients (M:N) ----------------------------------------
+
+app.post('/vendorIngredients/add', (req, res) => {
+    runProcedure(res, '/vendorIngredients',
+        'CALL sp_insert_vendor_ingredient(?, ?, ?);',
+        [req.body.vendorID, req.body.ingredientID, req.body.unitCost],
+        'add the vendor ingredient');
+});
+
+app.post('/vendorIngredients/update', (req, res) => {
+    runProcedure(res, '/vendorIngredients',
+        'CALL sp_update_vendor_ingredient(?, ?, ?, ?);',
+        [req.body.vendorIngredientID, req.body.vendorID,
+         req.body.ingredientID, req.body.unitCost],
+        'update the vendor ingredient');
+});
+
+app.post('/vendorIngredients/delete', (req, res) => {
+    runProcedure(res, '/vendorIngredients',
+        'CALL sp_delete_vendor_ingredient(?);',
+        [req.body.vendorIngredientID],
+        'delete the vendor ingredient');
+});
+
+// RESET DB -------------------------------------------------------
+
+// rebuilds the entire schema + sample data (sp_reset_foodmenudb in PL.SQL
+// wraps sp_load_foodmenudb in DDL.sql)
+app.post('/reset', (req, res) => {
+    runProcedure(res, '/',
+        'CALL sp_reset_foodmenudb();',
+        [],
+        'reset the database');
+});
 
 app.listen(PORT, () => {
     console.log(`Express started on http://localhost:${PORT}; press Ctrl-C to terminate.`);

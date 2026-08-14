@@ -1,7 +1,7 @@
 {
   "name": "homegrown-menu-pricing",
   "version": "1.0.0",
-  "description": "CS340 Group 41 - Homegrown Restaurant Food Menu Pricing System (Step 4 Draft)",
+  "description": "CS340 Group 41 - Homegrown Restaurant Food Menu Pricing System (Portfolio Project, Final Step)",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"

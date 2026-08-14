@@ -4,7 +4,9 @@
 <p>Manage which ingredients, and how much of each, go into every menu item.</p>
 
 <section>
-    <h2>Browse Menu Item Ingredients</h2>
+    <h2>READ &mdash; Browse Menu Item Ingredients (M:N)</h2>
+    <p class="form-note">Deleting a row here removes an M:N relationship
+       (only the pairing is deleted; the menu item and ingredient are kept).</p>
     <table>
         <thead>
             <tr>
@@ -37,10 +39,10 @@
 </section>
 
 <section>
-    <h2>Add an Ingredient to a Menu Item</h2>
+    <h2>CREATE &mdash; Add an Ingredient to a Menu Item (M:N)</h2>
     <form method="POST" action="/menuItemIngredients/add">
         <fieldset>
-            <legend>New menu item / ingredient pairing</legend>
+            <legend>New menu item / ingredient pairing (<span class="required-marker">*</span> all fields required)</legend>
             <p>
                 <label for="add-menuItemID">Menu Item:</label>
                 <select id="add-menuItemID" name="menuItemID" required>
@@ -70,10 +72,12 @@
 </section>
 
 <section>
-    <h2>Update a Menu Item Ingredient</h2>
+    <h2>UPDATE &mdash; Update a Menu Item Ingredient (M:N relationship update)</h2>
+    <p class="form-note">Both foreign keys of the selected pairing (the menu
+       item and the ingredient) can be changed here, plus the amount.</p>
     <form method="POST" action="/menuItemIngredients/update">
         <fieldset>
-            <legend>Select a pairing and enter its new details</legend>
+            <legend>Select a pairing and enter its new details (<span class="required-marker">*</span> all fields required)</legend>
             <p>
                 <label for="update-menuItemIngredientID">Pairing to Update:</label>
                 <select id="update-menuItemIngredientID" name="menuItemIngredientID" required>

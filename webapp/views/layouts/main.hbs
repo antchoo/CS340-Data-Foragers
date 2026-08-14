@@ -22,6 +22,8 @@
                         padding: 0.4em 0.9em; cursor: pointer; font-weight: bold; }
         .db-error { background-color: #ffe0e0; border: 1px solid #b30000;
                     padding: 0.6em 1em; margin-bottom: 1.5em; }
+        .required-marker { color: #b30000; font-weight: bold; }
+        .form-note { color: #444; font-style: italic; max-width: 40em; }
     </style>
 </head>
 <body>
@@ -32,7 +34,10 @@
         <a href="/vendors">Vendors</a>
         <a href="/menuItemIngredients">Menu Item Ingredients</a>
         <a href="/vendorIngredients">Vendor Ingredients</a>
-        <form method="POST" action="/reset">
+        {{!-- RESET DB: calls sp_reset_foodmenudb() (PL.SQL), which rebuilds
+              every table and its sample data via sp_load_foodmenudb() (DDL.sql) --}}
+        <form method="POST" action="/reset"
+              onsubmit="return confirm('Reset the database? All tables will be restored to their original sample data.');">
             <button type="submit" class="reset-button">RESET Database</button>
         </form>
     </nav>

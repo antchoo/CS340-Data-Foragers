@@ -2,10 +2,19 @@
 -- Group 41 CS340 Summer 2026 OSU
 -- Anton Choo and Borislava Grigorova
 --
--- Data Definition Queries + sample data, wrapped in the sp_load_foodmenudb()
--- stored procedure (per the sp_moviedb.sql example) so the web app's RESET
--- button can rebuild the schema and sample data with `CALL sp_load_foodmenudb();`
--- (see webapp/app.js, POST /reset).
+-- DDL.sql: Data Definition Queries + sample data for the CS340 Portfolio
+-- Project (Final Step) -- the Homegrown Restaurant Food Menu Pricing System.
+-- Hand-authored (not a MySQL dump).
+--
+-- The entire schema (5 tables: MenuItems, Ingredients, Vendors, and the
+-- MenuItemIngredients / VendorIngredients intersection tables) and its
+-- sample data are wrapped in the sp_load_foodmenudb() stored procedure
+-- (per the class sp_moviedb.sql example) so the web app's RESET button can
+-- rebuild everything. Import this file first, then PL.SQL, then run:
+--     CALL sp_load_foodmenudb();
+-- Sample-data INSERTs populate all foreign keys with SELECT subqueries
+-- (no hard-coded IDs), and FK constraints use CASCADE / SET NULL rules to
+-- avoid data anomalies (see the comments on each table).
 --
 
 DROP PROCEDURE IF EXISTS sp_load_foodmenudb;

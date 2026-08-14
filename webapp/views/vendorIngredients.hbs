@@ -4,7 +4,9 @@
 <p>Manage which ingredients each vendor offers and the cost per unit.</p>
 
 <section>
-    <h2>Browse Vendor Ingredients</h2>
+    <h2>READ &mdash; Browse Vendor Ingredients (M:N)</h2>
+    <p class="form-note">Deleting a row here removes an M:N relationship
+       (only the offering is deleted; the vendor and ingredient are kept).</p>
     <table>
         <thead>
             <tr>
@@ -37,10 +39,10 @@
 </section>
 
 <section>
-    <h2>Add an Ingredient Offered by a Vendor</h2>
+    <h2>CREATE &mdash; Add an Ingredient Offered by a Vendor (M:N)</h2>
     <form method="POST" action="/vendorIngredients/add">
         <fieldset>
-            <legend>New vendor / ingredient offering</legend>
+            <legend>New vendor / ingredient offering (<span class="required-marker">*</span> all fields required)</legend>
             <p>
                 <label for="add-vendorID">Vendor:</label>
                 <select id="add-vendorID" name="vendorID" required>
@@ -70,10 +72,12 @@
 </section>
 
 <section>
-    <h2>Update a Vendor Ingredient</h2>
+    <h2>UPDATE &mdash; Update a Vendor Ingredient (M:N relationship update)</h2>
+    <p class="form-note">Both foreign keys of the selected offering (the vendor
+       and the ingredient) can be changed here, plus the unit cost.</p>
     <form method="POST" action="/vendorIngredients/update">
         <fieldset>
-            <legend>Select an offering and enter its new details</legend>
+            <legend>Select an offering and enter its new details (<span class="required-marker">*</span> all fields required)</legend>
             <p>
                 <label for="update-vendorIngredientID">Offering to Update:</label>
                 <select id="update-vendorIngredientID" name="vendorIngredientID" required>
